@@ -11,7 +11,7 @@ class CollatzLogic : public QObject {
     Q_OBJECT
 
 public:
-    explicit CollatzLogic(int limit, int threadCount, QObject *parent = nullptr);
+    explicit CollatzLogic(int limit, int threadCount, QVector<int> &sharedCache, QObject *parent = nullptr);
     void requestInterruption();
 
 signals:
@@ -26,8 +26,8 @@ private:
     int limit;
     int threadCount;
     bool interrupted;
-
-    QPair<int, bool> collatzLength(long long n);
+    QVector<int> &cache;
+    int collatzLength(uint64_t n, bool &overflow);
 };
 
 #endif // COLLATZLOGIC_H

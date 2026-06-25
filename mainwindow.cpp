@@ -60,7 +60,7 @@ void MainWindow::onStartClicked() {
         delete logic;
     }
 
-    logic = new CollatzLogic(limit, threadCount);
+    logic = new CollatzLogic(limit, threadCount, sharedCache);
     logic->moveToThread(&logicThread);
 
     connect(&logicThread, &QThread::started, logic, &CollatzLogic::process);

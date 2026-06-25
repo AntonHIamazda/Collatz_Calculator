@@ -28,9 +28,11 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QThread logicThread;
-    CollatzLogic *logic;  // Тепер компілятор знає про цей клас
+    CollatzLogic *logic;
     int maxLimit;
     int threadCount;
+
+    QVector<int> sharedCache;
 
     void setupUI();
     void updateThreadCount();
