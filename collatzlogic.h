@@ -27,7 +27,7 @@ private:
     int threadCount;
     bool interrupted;
     QVector<int> &cache;
-    int collatzLength(uint64_t n, bool &overflow);
+    int collatzLength(uint64_t n);
 };
 
 #endif // COLLATZLOGIC_H

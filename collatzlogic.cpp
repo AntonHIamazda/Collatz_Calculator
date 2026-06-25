@@ -1,5 +1,4 @@
 #include "collatzlogic.h"
-#include <limits>
 #include <algorithm>
 
 CollatzLogic::CollatzLogic(int limit, int threadCount, QVector<int> &sharedCache, QObject *parent)
@@ -22,7 +21,7 @@ void CollatzLogic::process() {
     int currentCacheSize = 0;
 
     if(limit > 100000){
-        currentCacheSize = 500000;
+        currentCacheSize = 300000;
         currentCacheSize = std::min(limit, currentCacheSize);
     }
 
@@ -35,8 +34,7 @@ void CollatzLogic::process() {
             if (interrupted) break;
 
             if (cache[i] == 0) {
-                bool overflow = false;
-                cache[i] = collatzLength(static_cast<uint64_t>(i), overflow);
+                cache[i] = collatzLength(static_cast<uint64_t>(i));
             }
         }
 
@@ -50,17 +48,12 @@ void CollatzLogic::process() {
             futures.append(QtConcurrent::run([this, currentTask, limit = this->limit]() -> QPair<int, int> {
                 int maxNumber = 1;
                 int maxLength = 1;
-                bool overflow = false;
                 int j;
 
                 while((j = currentTask->fetch_add(1, std::memory_order_relaxed)) <= limit){
                     if (interrupted) return qMakePair(-1, -1);
 
-                    int length = collatzLength(static_cast<uint64_t>(j), overflow);
-
-                    if(overflow){
-                        return qMakePair(-1, -1);
-                    }
+                    int length = collatzLength(static_cast<uint64_t>(j));
 
                     if(length > maxLength){
                         maxNumber = j;
@@ -95,25 +88,17 @@ void CollatzLogic::process() {
 
 
 
-int CollatzLogic::collatzLength(uint64_t n, bool &overflow) {
+int CollatzLogic::collatzLength(uint64_t n) {
 
     int length = 0;
-    const uint64_t maxLimit = std::numeric_limits<uint64_t>::max()/3;
-
     int cacheSize = cache.size() - 1;
 
     while(n != 1){
         if(cacheSize > 0 && n <= cacheSize && cache[n] != 0){
-            length += cache[n];
-            overflow = false;
-            return length;
+            return length + cache[n];
         }
 
         if(n & 1){
-            if(n > maxLimit){
-                overflow = true;
-                return -1;
-            }
             n = n * 3 + 1;
             n >>= 1;
             length += 2;
@@ -123,7 +108,6 @@ int CollatzLogic::collatzLength(uint64_t n, bool &overflow) {
             length ++;
         }
     }
-    overflow = false;
     return length + 1;
 
 
